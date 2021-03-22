@@ -12,7 +12,7 @@ var configs = (function () {
     }
   };
   Singleton.defaultOptions = {
-    general_help: "Below there's a list of commands that you can use.\nYou can use autofill by pressing the TAB key.",
+    general_help: "Below there's a list of commands that you can use.",
     help_help: "Print this menu.",
     whoami_help: "Print information about me.",
     getemail_help: "Print my email to get in contact.",
@@ -118,9 +118,6 @@ var main = (function () {
       if (event.which === 13 || event.keyCode === 13) {
         this.handleCmd();
         ignoreEvent(event);
-      } else if (event.which === 9 || event.keyCode === 9) {
-        this.handleFill();
-        ignoreEvent(event);
       }
     }.bind(this));
     this.reset();
@@ -142,41 +139,12 @@ var main = (function () {
     this.cmdLine.disabled = true;
   };
 
-  Terminal.prototype.unlock = function () {
+  Terminal.prototype.unlock = function (focus=true) {
     this.cmdLine.disabled = false;
     this.prompt.textContent = this.completePrompt;
     scrollToBottom();
-    this.focus();
-  };
-
-  Terminal.prototype.handleFill = function () {
-    var cmdComponents = this.cmdLine.value.trim().split(" ");
-    if ((cmdComponents.length <= 1) || (cmdComponents.length === 2 && cmdComponents[0] === cmds.CAT.value)) {
-      this.lock();
-      var possibilities = [];
-      if (cmdComponents[0].toLowerCase() === cmds.CAT.value) {
-        if (cmdComponents.length === 1) {
-          cmdComponents[1] = "";
-        }
-      } else {
-        for (var command in cmds) {
-          if (cmds[command].value.startsWith(cmdComponents[0].toLowerCase())) {
-            possibilities.push(cmds[command].value);
-          }
-        }
-      }
-      if (possibilities.length === 1) {
-        this.cmdLine.value = possibilities[0] + " ";
-        this.unlock();
-      } else if (possibilities.length > 1) {
-        this.type(possibilities.join("\n"), function () {
-          this.cmdLine.value = cmdComponents.join(" ");
-          this.unlock();
-        }.bind(this));
-      } else {
-        this.cmdLine.value = cmdComponents.join(" ");
-        this.unlock();
-      }
+    if (focus == true) {
+      this.focus();
     }
   };
 
@@ -235,7 +203,7 @@ var main = (function () {
     this.prompt.textContent = "";
     if (this.typeSimulator) {
       this.type(configs.getInstance().welcome + (isUsingIE ? "\n" + configs.getInstance().internet_explorer_warning : ""), function () {
-        this.unlock();
+        this.unlock(focus=false);
       }.bind(this));
     }
   };
